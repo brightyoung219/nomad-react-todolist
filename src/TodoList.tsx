@@ -21,26 +21,55 @@ import { useForm } from "react-hook-form";
 //   )
 // }
 
+interface IForm {
+  email: string;
+  username: string;
+  password: string;
+}
+
 function TodoList() {
-  const { register, handleSubmit, formState } = useForm();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<IForm>({
+    // 기본값 설정
+    defaultValues: {
+      email: "@naver.com",
+    },
+  });
   // submit 제출 후 모든 데이터가 유효할 경우 실행되는 함수
   const onValid = (data: any) => {
     console.log(data);
   };
-  console.log(formState.errors);
+  console.log(errors);
   return (
     <div>
-      <form onSubmit={handleSubmit(onValid)}>
-        <input {...register("Email", { required: true })} placeholder="Email" />
+      <form
+        style={{ display: "flex", flexDirection: "column" }}
+        onSubmit={handleSubmit(onValid)}
+      >
+        {/* email 정규식 사용하기 */}
         <input
-          {...register("id", {
+          {...register("email", {
+            required: "Email is required",
+            pattern: {
+              value: /^[A-Za-z0-9._%+-]+@naver.com$/,
+              message: "only naver.com emails allowed",
+            },
+          })}
+          placeholder="Email"
+        />
+        <span>{errors?.email?.message}</span>
+        <input
+          {...register("username", {
             required: true,
             minLength: { value: 5, message: "Your id is too short." },
           })}
           placeholder="id"
         />
         <input
-          {...register("pw", { required: "password is required" })}
+          {...register("password", { required: "password is required" })}
           placeholder="pw"
         />
         <button>Add</button>
