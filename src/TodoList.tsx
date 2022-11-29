@@ -25,13 +25,17 @@ interface IForm {
   email: string;
   username: string;
   password: string;
+  password1: string;
+  extraError?: string; //옵션 서버 다운될 경우 사용
 }
 
 function TodoList() {
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
+    setError
   } = useForm<IForm>({
     // 기본값 설정
     defaultValues: {
@@ -39,8 +43,12 @@ function TodoList() {
     },
   });
   // submit 제출 후 모든 데이터가 유효할 경우 실행되는 함수
-  const onValid = (data: any) => {
-    console.log(data);
+  const onValid = (data: IForm) => {
+    if(data.password !== data.password1){
+      setError("password1", {message: "password are not the same"})
+    }
+    setError("extraError", {message: "server offline."}, {shouldFocus: true});
+    reset();
   };
   console.log(errors);
   return (
@@ -63,8 +71,13 @@ function TodoList() {
         <span>{errors?.email?.message}</span>
         <input
           {...register("username", {
-            required: true,
-            minLength: { value: 5, message: "Your id is too short." },
+            required: "write username",
+            validate:{ 
+              noAbc: (value) => 
+              value.includes("abc") ? "no abc allowed" : true,
+              noNico: (value) => 
+              value.includes("nico") ? "no nico allowed" : true,
+            }
           })}
           placeholder="id"
         />
@@ -72,8 +85,15 @@ function TodoList() {
           {...register("password", { required: "password is required" })}
           placeholder="pw"
         />
+        <input
+          {...register("password1", { required: "password is required" })}
+          placeholder="pw"
+        />
+        <span>{errors?.password1?.message}</span>
         <button>Add</button>
       </form>
+
+      <span>{errors?.extraError?.message}</span>
     </div>
   );
 }
